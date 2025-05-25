@@ -56,7 +56,7 @@ We provide comprehensive documentation for users of different roles:
 
 - [Requirements](#requirements)
 - [Local Development Environment Setup](#local-development-environment-setup)
-- [Project Build and Testing](#project-build-and-testing)
+- [Project Build](#project-build)
 - [Contract Development Process](#contract-development-process)
 - [Testnet Deployment](#testnet-deployment)
   - [Configure Solana Network and Wallet](#1-configure-solana-network-and-wallet)
@@ -124,7 +124,7 @@ cd solana-stake
 npm install
 ```
 
-## Project Build and Testing
+## Project Build
 
 ### Build Project
 
@@ -138,124 +138,6 @@ anchor build --program-name cfx-rewards
 anchor build --program-name cfx-liquidity
 anchor build --program-name chain-fox-dao
 ```
-
-### Run Tests
-
-```bash
-# Run all tests
-anchor test
-
-# Run tests for specific programs
-anchor test --program-name cfx-stake-core
-anchor test --program-name cfx-rewards
-anchor test --program-name cfx-liquidity
-anchor test --program-name chain-fox-dao
-```
-
-### Test Coverage
-
-Project testing includes the following aspects:
-
-1. **Unit Tests**: Test correctness of individual functions and instructions
-2. **Integration Tests**: Test interactions between contracts
-3. **Edge Case Tests**: Test error handling and boundary conditions
-4. **Security Tests**: Test permission controls and fund security
-
-### Test Data Preparation
-
-Testing requires the following data:
-
-1. **Test Tokens**: Create test CFX tokens for staking
-2. **Test Accounts**: Create multiple test user accounts
-3. **Test Proposals**: Create various types of test proposals
-
-#### macOS User Notes
-
-When using Anchor for testing on macOS, you may encounter errors related to hidden metadata files (._genesis.bin):
-
-```
-Error: failed to start validator: Failed to create ledger at test-ledger: io error: Error checking to unpack genesis archive: Archive error: extra entry found: "._genesis.bin"
-```
-
-This is caused by hidden metadata files created by macOS when handling compressed files. We have configured a solution in Anchor.toml. Follow these steps to ensure smooth testing:
-
-1. Clean existing test ledger directories:
-
-```bash
-rm -rf test-ledger .anchor/test-ledger
-```
-
-2. Ensure Anchor.toml contains the following configuration:
-
-```toml
-[test]
-startup_wait = 10000
-
-[scripts]
-test = "COPYFILE_DISABLE=1 yarn run mocha -t 1000000 tests/**/*.js"
-```
-
-3. Then run tests:
-
-```bash
-anchor test
-```
-
-This will use the COPYFILE_DISABLE environment variable to prevent macOS from creating hidden metadata files and increase the validator startup wait time.
-
-#### RPC Port Already in Use
-
-If you encounter the following error when running `anchor test`:
-
-```
-Error: Your configured rpc port: 8899 is already in use
-```
-
-This indicates that a Solana validator node or other service may already be using port 8899. This error may appear even if you just started a validator node using `COPYFILE_DISABLE=1 solana-test-validator`.
-
-Solutions:
-
-1. Check and terminate all solana validator node processes:
-
-```bash
-# Check processes using port 8899
-lsof -i :8899
-# or
-ps aux | grep solana-test-validator
-
-# Terminate all solana-test-validator processes
-pkill solana-test-validator
-```
-
-2. Modify Anchor.toml file, add `--skip-local-validator` option to test script:
-
-```toml
-[scripts]
-test = "yarn run mocha -t 1000000 tests/**/*.js --skip-local-validator"
-```
-
-3. Ensure starting validator node first, then run tests:
-
-```bash
-# Start validator node in one terminal
-COPYFILE_DISABLE=1 solana-test-validator
-
-# Run tests in another terminal
-anchor test
-```
-
-4. If the problem persists, you can try:
-   - Restart computer to completely clear all background processes
-   - Modify provider configuration in Anchor.toml to use a different RPC port:
-
-   ```toml
-   [provider]
-   cluster = "Localnet"
-   wallet = "/Users/eason/.config/solana/id.json"
-   # Custom RPC port
-   # Add this line to use an unused port
-   rpc_port = 8890
-   ```
 
 ## Testnet Deployment
 
@@ -473,29 +355,21 @@ Chain-Fox DAO project follows this development process:
 
 2. **Implementation Phase**:
    - Implement contract code according to design documents
-   - Write unit tests and integration tests
    - Conduct code reviews and optimization
 
-3. **Testing Phase**:
-   - Comprehensive testing in local environment
-   - Deploy and test on testnet
-   - Conduct security audits and vulnerability fixes
-
-4. **Deployment Phase**:
+3. **Deployment Phase**:
    - Prepare deployment scripts and configurations
    - Calculate program rent
    - Deploy to mainnet
 
-5. **Maintenance Phase**:
+4. **Maintenance Phase**:
    - Monitor contract operation status
    - Handle user feedback and issues
-   - Plan and implement upgrades
 
 ### Code Review Checklist
 
 Before each code submission, ensure:
 
-- [ ] All tests have passed
 - [ ] Code follows project coding standards
 - [ ] All edge cases and error conditions are handled
 - [ ] Permission checks are correctly implemented
@@ -537,24 +411,3 @@ solana config set --url https://your-custom-rpc.com
 
 - Testnet: Use `solana airdrop` command to get test SOL
 - Mainnet: Transfer real SOL from exchanges or other wallets
-
-### Program Upgrades
-
-Solana programs are not upgradeable by default. Chain-Fox DAO project uses the following upgrade strategy:
-
-1. **Upgradeable Design**:
-   - Programs use proxy pattern design, allowing logic upgrades
-   - Data accounts are separated from program logic for easy upgrades
-
-2. **Upgrade Process**:
-   - Upgrade execution requires multi-signature wallet authorization
-   - Comprehensive testing before upgrades
-   - Verification and monitoring after upgrades
-
-3. **Upgrade Commands**:
-   ```bash
-   # Deploy new version program
-   anchor upgrade --program-id <program_ID> --program-buffer <new_program_buffer>
-   ```
-
-
