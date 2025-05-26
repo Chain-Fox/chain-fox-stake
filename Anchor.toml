@@ -1,0 +1,34 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+cfx_stake_core = "GRqdtyXwmjxKHWsZTaUFPh7ZXL11Vw11yqDGduJJVfkd"
+
+[programs.devnet]
+cfx_stake_core = "BqtM51hgLrgNidapuLLQdcmX4PkhyBQMj715Ddyqbyao"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet = "/Users/eason/.config/solana/id.json"
+
+[test]
+startup_wait = 10000
+skip_local_validator = true
+
+[scripts]
+test = "yarn run mocha -t 1000000 tests/**/*.js"
+
+# BPF loader configuration for larger programs
+[test.validator]
+# Use the upgraded BPF loader that supports larger programs
+[[test.validator.clone]]
+address = "BPFLoaderUpgradeab1e11111111111111111111111"
+
+# Increase the compute budget for the program
+[test.validator.compute_budget]
+compute_unit_limit = 1400000
+heap_size = 256000
