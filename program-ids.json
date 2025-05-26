@@ -1,0 +1,68 @@
+{
+  "timestamp": "2025-05-26T10:59:34.346Z",
+  "network": "localnet",
+  "deployer": "4o3E6G5wTwcqLR2J278h27pGQmU6YesSNKSjUdQbhFK9",
+  "programs": {
+    "CFX_STAKE_CORE": "7Fbkoma4qtT6qF4r8ifWYnCa1oz3RGpnosjBmH6HvdTj"
+  },
+  "tokens": {
+    "CFX_TOKEN_MINT": "BWHgo7c7cUhWgcuDLL3CKxz2QcG1hEPDjpPQ4xwfHEp1"
+  },
+  "deployed_accounts": {
+    "stake_pool": {
+      "address": "HWY7FDS2T8wPvWPJEu1QjyePFmFfKYqFsn9EZc7ij7Jk",
+      "type": "PDA",
+      "program": "CFX_STAKE_CORE",
+      "description": "质押池账户",
+      "seeds": [
+        "stake_pool",
+        "CFX_TOKEN_MINT"
+      ],
+      "bump": 255
+    },
+    "authority_wallet": {
+      "address": "4o3E6G5wTwcqLR2J278h27pGQmU6YesSNKSjUdQbhFK9",
+      "type": "Wallet",
+      "description": "当前部署者和管理员钱包",
+      "role": "admin"
+    },
+    "team_wallet": {
+      "address": "12qdnh5cXQhAuD3w4TMyZy352CEndxzgKx1da7BHmPF7",
+      "type": "Wallet",
+      "description": "团队钱包地址，用于接收流动性资金",
+      "role": "team_treasury"
+    },
+    "token_vault": {
+      "address": "BjdR73YBZS7T683cHnCTtvZN2eZ5pQ8p58B12fKFMsKN",
+      "type": "TokenAccount",
+      "program": "TOKEN_PROGRAM",
+      "description": "质押池代币金库",
+      "mint": "BWHgo7c7cUhWgcuDLL3CKxz2QcG1hEPDjpPQ4xwfHEp1",
+      "authority": "HWY7FDS2T8wPvWPJEu1QjyePFmFfKYqFsn9EZc7ij7Jk"
+    }
+  },
+  "deployed_programs": [
+    {
+      "name": "cfx-stake-core",
+      "id": "7Fbkoma4qtT6qF4r8ifWYnCa1oz3RGpnosjBmH6HvdTj",
+      "dirName": "cfx-stake-core"
+    }
+  ],
+  "metadata": {
+    "total_programs": 1,
+    "successful_deployments": 1,
+    "deployment_tool": "anchor",
+    "version": "1.0.0",
+    "description": "Chain-Fox DAO - Solana 质押协议",
+    "cfx_token_info": {
+      "name": "Chain-Fox Token",
+      "symbol": "CFX",
+      "decimals": 6,
+      "total_supply": "1000000000000000",
+      "network": "localnet",
+      "created_at": "2025-05-25T12:41:21.605Z"
+    },
+    "last_regeneration": "2025-05-26T10:55:53.226Z",
+    "regeneration_reason": "Program code changes"
+  }
+}

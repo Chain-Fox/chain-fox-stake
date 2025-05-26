@@ -1,0 +1,13 @@
+{
+  "address": "4o3E6G5wTwcqLR2J278h27pGQmU6YesSNKSjUdQbhFK9",
+  "tokenAccount": "5LqkTJYwxMB7jtrJ8zxG6xTcCqtXnCg9nuH8uZDsG4UN",
+  "signers": [
+    "4o3E6G5wTwcqLR2J278h27pGQmU6YesSNKSjUdQbhFK9",
+    "BPfraTVTrmGttZzSiabeX5bfYjEaRP6X8vap6vz5gGf3",
+    "2pcJgb9kgd5rS9EEWFnuk26PF575haD6e2dzgYJhAuuY"
+  ],
+  "threshold": 2,
+  "network": "localnet",
+  "createdAt": "2025-05-25T08:35:56.623Z",
+  "description": "Chain-Fox DAO Team Multisig Wallet"
+}

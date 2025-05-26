@@ -1,413 +1,349 @@
 # Chain-Fox DAO
 
-Chain-Fox DAO is a decentralized autonomous organization running on the Solana blockchain, featuring a staking protocol and governance system. Users can stake CFX tokens to gain voting rights and potential rewards, and participate in project governance decisions.
+Chain-Fox DAO is a decentralized autonomous organization running on the Solana blockchain with a secure staking protocol. Users can stake CFX tokens through personal vault accounts and have emergency withdrawal capabilities.
 
 ## Project Components
 
-The project includes the following main contracts:
+The project has been simplified to include one main contract:
 
-1. **Staking Core Contract (cfx-stake-core)**:
-   - Manages user-staked CFX tokens
-   - Handles staking and unstaking operations
-   - Maintains user staking records
+**CFX Staking Core Contract (cfx-stake-core)**:
+- Manages all CFX token staking operations
+- Supports regular staking with individual user vault accounts
+- Handles staking, withdrawal requests, and emergency mechanisms
+- Maintains comprehensive user staking records
+- Implements slot-based timing mechanisms for enhanced security
+- Features multi-signature management for critical operations
 
-2. **Rewards Contract (cfx-rewards)**:
-   - Handles staking reward distribution
-   - Manages reward pools
-   - Calculates user rewards
+## Contract Features
 
-3. **Liquidity Contract (cfx-liquidity)**:
-   - Manages liquidity allocation
-   - Handles liquidity extraction
-   - Interacts with trading platforms
+### Staking System
 
-4. **Multi-signature Wallet Contract (chain-fox-dao)**:
-   - Implements multi-signature wallet functionality
-   - Manages team fund security
-   - Handles liquidity management operations
+**Regular Staking**:
+- Funds are stored in a unified contract vault account (token_vault controlled by staking pool PDA)
+- UserStake accounts only record individual user staking information (amounts, timestamps, etc.)
+- Actual CFX tokens are stored in the contract's unified token vault
+- Fully on-chain management, only users themselves can deposit and withdraw
+- Administrators cannot access or operate user funds, even in emergency situations
+- Supports emergency withdrawal with immediate unlock during emergency mode
+- Lock period of 30 days for withdrawals
 
-## Contract Addresses
+### Emergency Mechanisms
 
-### Devnet Deployment Addresses
-
-- **CFX Stake Core**: `426MdbCio9rvekWxFiz2AmEQwBXAkASZqmrf3eW1RQAo`
-- **CFX Rewards**: `BgWUGrXRKF3pgVEgstwau11AGgynhsZwyiHhXoC5bn6t`
-- **CFX Liquidity**: `3Hn6Smh85GBpwWdAvu4sCgg5TjsQtUsuAsYp5t4yyqKn`
+- **Emergency Mode**: Multi-signature can activate emergency pause through proposals
+- **Regular Staking**: Allows immediate withdrawal during emergency (bypassing lock period)
+- **New Staking**: Blocked during emergency mode
+- **User Fund Protection**: Administrator emergency powers do not include user fund access
 
 ### Important Constants
 
-- **CFX Token Mint**: `RhFVq1Zt81VvcoSEMSyCGZZv5SwBdA8MV7w4HEMpump`
-- **Team Wallet**: `12qdnh5cXQhAuD3w4TMyZy352CEndxzgKx1da7BHmPF7`
-- **Minimum Stake Amount**: 10,000 CFX
+- **CFX Token Mint Address**: `RhFVq1Zt81VvcoSEMSyCGZZv5SwBdA8MV7w4HEMpump`
+- **Minimum Stake Amount**: 10,000 CFX (6 decimals)
 - **Default Lock Period**: 30 days
+- **Slot-based Timing**: Uses Solana slots for enhanced security
 
-## 📚 Documentation Center
+## Contract Functions
 
-We provide comprehensive documentation for users of different roles:
+The CFX Staking Core contract provides the following main functions:
 
-- **[📁 Documentation Center](./docs/)** - Complete documentation index and navigation
-- **[🎨 Frontend Development](./docs/frontend/)** - Frontend integration guides and API documentation
-- **[📋 Contract Documentation](./docs/contracts/)** - Smart contract technical documentation
-- **[📖 User Guides](./docs/guides/)** - User instructions (Chinese and English)
-- **[🧪 Testing Documentation](./docs/testing/)** - Testing methods and debugging guides
-- **[🚀 Deployment Documentation](./docs/deployment/)** - Deployment guides and operations documentation
+### Administrator Functions
 
-## Table of Contents
+1. **initialize**: Initialize staking pool with configuration parameters
+2. **initialize_multisig**: Set up multi-signature configuration with 3 signers and threshold
+3. **toggle_pause**: Enable/disable emergency mode (deprecated - use multi-sig proposals)
 
-- [Requirements](#requirements)
-- [Local Development Environment Setup](#local-development-environment-setup)
-- [Project Build](#project-build)
-- [Contract Development Process](#contract-development-process)
-- [Testnet Deployment](#testnet-deployment)
-  - [Configure Solana Network and Wallet](#1-configure-solana-network-and-wallet)
-  - [Get Testnet SOL](#2-get-testnet-sol)
-  - [Update Project Configuration](#3-update-project-configuration)
-  - [Deploy CFX Token on Testnet (SPL Token)](#4-deploy-cfx-token-on-testnet-spl-token)
-  - [Calculate Program Rent](#5-calculate-program-rent)
-  - [Deploy to Testnet](#6-deploy-to-testnet)
-  - [Run Deployment Scripts](#7-run-deployment-scripts)
-- [Mainnet Deployment](#mainnet-deployment)
-  - [Prepare Mainnet Deployment Wallet](#1-prepare-mainnet-deployment-wallet)
-  - [Update Project Configuration](#2-update-project-configuration-1)
-  - [Deploy CFX Token on Mainnet (SPL Token)](#3-deploy-cfx-token-on-mainnet-spl-token)
-  - [Calculate Mainnet Program Rent](#4-calculate-mainnet-program-rent)
-  - [Deploy to Mainnet](#5-deploy-to-mainnet)
-  - [Run Mainnet Deployment Scripts](#6-run-mainnet-deployment-scripts)
-- [FAQ](#faq)
+### Multi-signature Functions
 
-## Requirements
+1. **create_proposal**: Create multi-signature proposals for administrator operations
+2. **sign_proposal**: Sign existing proposals
+3. **execute_proposal**: Execute approved proposals
+4. **execute_admin_withdraw**: Execute administrator withdrawal from token vault (requires multi-sig approval)
 
-- [Node.js](https://nodejs.org/) v14 or higher
-- [Rust](https://www.rust-lang.org/tools/install) - Stable version
-- [Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools) v1.14 or higher
-- [Anchor CLI](https://www.anchor-lang.com/docs/installation) v0.26.0
+### User Functions
 
-## Local Development Environment Setup
+1. **create_user_stake**: Create user staking account (one-time setup)
+2. **stake**: Stake CFX tokens (transfers funds to contract's unified token vault)
+3. **request_withdrawal**: Request withdrawal and set lock period
+4. **withdraw**: Execute withdrawal after lock period expires
 
-### 1. Install Rust
+### Usage Flow
+
+#### Regular Staking Flow:
+1. User calls `create_user_stake` (if first time) - Creates UserStake PDA to record user staking information
+2. User calls `stake` with amount - Funds transfer to contract's unified token vault
+3. User calls `request_withdrawal` - Initiates 30-day lock period
+4. After 30 days (or immediately in emergency mode), user calls `withdraw` - Funds transfer from contract vault back to user
+
+#### Administrator Operation Flow:
+1. Any multi-sig signer calls `create_proposal` specifying operation type and data
+2. Other signers call `sign_proposal` until threshold is reached
+3. Anyone calls `execute_proposal` to execute approved proposal
+4. For administrator withdrawals, use special proposal type `execute_admin_withdraw`
+
+## Security Features
+
+The CFX Staking Core contract implements multiple security features:
+
+- **Slot-based Timing**: Uses Solana slots rather than timestamps for enhanced security
+- **Emergency Pause**: Multi-signature can pause new staking operations in emergencies
+- **Unified Contract Vault**: All user funds stored in single contract-controlled token vault
+- **Individual User Records**: Each user has their own UserStake PDA recording staking information
+- **User Fund Protection**: Only users themselves can deposit and withdraw, administrators cannot access user funds even in emergencies
+- **Multi-signature Management**: 3-wallet multi-signature mechanism for all critical administrator operations
+- **Reentrancy Attack Protection**: Guards against reentrancy attacks in critical functions
+- **Staking Limits**: Maximum individual stake (10 million CFX) and maximum total pool size (400 million CFX)
+- **Time Range Checks**: Lock periods cannot exceed 1 year
+- **Arithmetic Safety**: All calculations include overflow protection
+- **Administrator Withdrawal Control**: Administrators can only withdraw CFX from contract's token vault through AdminWithdraw multi-sig proposals
+- **User Fund Protection**: Contract tracks total_staked to ensure administrator withdrawals cannot access user staked funds
+
+## Permission Control Mechanisms
+
+### User Fund Security Guarantees
+
+The contract implements strict permission separation mechanisms to ensure user fund security:
+
+#### User-exclusive Permissions
+- **Staking Operations**: Only users themselves can stake CFX tokens
+- **Withdrawal Requests**: Only users themselves can request withdrawal of their own stakes
+- **Fund Withdrawal**: Only users themselves can withdraw their own staked funds
+
+#### Administrator Permission Limitations
+Administrators **cannot** perform the following operations:
+- ❌ Withdraw user staked funds from contract vault without user consent
+- ❌ Operate user staking accounts or modify user staking records
+- ❌ Bypass user signatures for any user fund operations
+- ❌ Access user funds even in emergency situations
+
+Administrators **can only** perform the following operations:
+- ✅ Toggle emergency mode (through multi-sig proposals)
+- ✅ Update contract permissions (through multi-sig proposals)
+- ✅ Withdraw CFX from contract's token vault (through AdminWithdraw multi-sig proposals)
+- ✅ Update multi-signature configuration (through multi-sig proposals)
+
+**Important Note**: Administrator withdrawals from the token vault are separate from user staked funds. The contract tracks `total_staked` to ensure user funds are protected, and administrator withdrawals can only access excess funds in the vault.
+
+#### Technical Implementation
+- **Account Binding**: Each user staking account is bound to specific users through PDA seeds
+- **Signature Verification**: All user operations require the user's own digital signature
+- **Ownership Checks**: Contract verifies that operators are the true owners of accounts
+
+## Multi-signature Management
+
+The contract uses a 3-wallet multi-signature mechanism to enhance the security of administrator operations.
+
+### Multi-signature Setup
+
+#### 1. Initialize Multi-signature Configuration
+
+After deploying the contract, the initial administrator must set up multi-signature configuration:
 
 ```bash
-# Install Rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-# Ensure using stable version
-rustup default stable
+# Example: Initialize multi-sig with 3 signers and 2/3 threshold
+anchor run initialize-multisig -- \
+  --signer1 "Pubkey1..." \
+  --signer2 "Pubkey2..." \
+  --signer3 "Pubkey3..." \
+  --threshold 2
 ```
 
-### 2. Install Solana Toolchain
+**Parameters:**
+- `signer1`, `signer2`, `signer3`: 3 wallet addresses that can sign proposals
+- `threshold`: Required number of signatures (recommended: 2 for 2/3 multi-sig)
+
+#### 2. Multi-signature Account Structure
+
+The multi-signature system creates two types of accounts:
+- **MultisigConfig**: Stores signer addresses and threshold settings
+- **MultisigProposal**: Individual proposals requiring signatures
+
+### Supported Administrator Operations
+
+The following operations require multi-signature approval:
+
+1. **Toggle Emergency Mode** (`ProposalType::TogglePause`)
+2. **Update Authority** (`ProposalType::UpdateAuthority`)
+3. **Administrator Withdrawal** (`ProposalType::AdminWithdraw`) - Withdraw from contract's token vault
+4. **Update Team Wallet** (`ProposalType::UpdateTeamWallet`) - Deprecated, no longer supported
+
+### Multi-signature Operation Flow
+
+#### Step 1: Create Proposal
+
+Any of the 3 signers can create a proposal:
 
 ```bash
-sh -c "$(curl -sSfL https://release.solana.com/v1.14.17/install)"
+# Example: Create emergency pause toggle proposal
+anchor run create-proposal -- \
+  --proposal-type "TogglePause" \
+  --data ""
 ```
 
-Add to path after installation:
-
 ```bash
-export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+# Example: Create authority update proposal
+anchor run create-proposal -- \
+  --proposal-type "UpdateAuthority" \
+  --data "NewAuthorityPubkey..."
 ```
 
-### 3. Install Anchor Framework
+#### Step 2: Sign Proposal
+
+Other signers must sign the proposal to reach threshold:
 
 ```bash
-# Install avm (Anchor Version Manager)
-cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-
-# Install Anchor 0.26.0
-avm install 0.26.0
-avm use 0.26.0
+# Each signer runs this command
+anchor run sign-proposal -- \
+  --proposal-id 0
 ```
 
-### 4. Clone and Install Project Dependencies
+**Note:** The proposer automatically signs when creating the proposal.
+
+#### Step 3: Execute Proposal
+
+Once threshold is reached (e.g., 2 signatures), anyone can execute the proposal:
 
 ```bash
-git clone <project-repository-URL>
+anchor run execute-proposal -- \
+  --proposal-id 0
+```
+
+### Multi-signature Examples
+
+#### Example 1: Activate Emergency Pause
+
+```bash
+# 1. Signer A creates emergency pause proposal
+anchor run create-proposal -- \
+  --proposal-type "TogglePause" \
+  --data ""
+
+# 2. Signer B signs proposal
+anchor run sign-proposal -- \
+  --proposal-id 0
+
+# 3. Execute proposal (activate emergency mode)
+anchor run execute-proposal -- \
+  --proposal-id 0
+```
+
+#### Example 2: Administrator Withdrawal from Token Vault
+
+```bash
+# 1. Signer A creates administrator withdrawal proposal
+# Data format: [amount: 8 bytes][recipient: 32 bytes]
+anchor run create-proposal -- \
+  --proposal-type "AdminWithdraw" \
+  --data "1000000000000+9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+
+# 2. Signer C signs proposal
+anchor run sign-proposal -- \
+  --proposal-id 1
+
+# 3. Execute proposal (execute administrator withdrawal)
+anchor run execute-admin-withdraw -- \
+  --proposal-id 1
+```
+
+### Multi-signature Security Advantages
+
+1. **No Single Point of Failure**: Critical operations require multiple signatures
+2. **Transparent Governance**: All proposals are recorded on-chain
+3. **Flexible Threshold**: Configurable (e.g., 2/3, 3/3)
+4. **Audit Trail**: Complete history of all administrator operations
+5. **Emergency Response**: Multiple parties can respond to security incidents
+
+### Multi-signature Best Practices
+
+1. **Secure Key Management**: Store multi-sig keys in separate, secure locations
+2. **Regular Key Rotation**: Consider periodically updating signers
+3. **Communication Protocols**: Establish clear communication channels between signers
+4. **Emergency Procedures**: Define clear procedures for emergency situations
+5. **Proposal Review**: Always review proposal details before signing
+
+## Build and Deploy
+
+### Prerequisites
+
+Ensure you have installed:
+- [Rust](https://rustup.rs/)
+- [Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools)
+- [Anchor Framework](https://www.anchor-lang.com/docs/installation)
+- [Node.js](https://nodejs.org/) (v16+)
+
+### Local Development Setup
+
+```bash
+# Clone repository
+git clone <repository-url>
 cd solana-stake
+
+# Install dependencies
 npm install
-```
 
-## Project Build
-
-### Build Project
-
-```bash
-# Build all Solana programs
+# Build program
 anchor build
 
-# Build specific programs
-anchor build --program-name cfx-stake-core
-anchor build --program-name cfx-rewards
-anchor build --program-name cfx-liquidity
-anchor build --program-name chain-fox-dao
+# Start local validator
+solana-test-validator
+
+# Deploy to local network
+anchor deploy
 ```
 
-## Testnet Deployment
-
-### 1. Configure Solana Network and Wallet
+### Testnet Deployment
 
 ```bash
-# Switch to devnet
-solana config set --url https://api.devnet.solana.com
+# Set to testnet
+solana config set --url devnet
 
-# Create new wallet (if needed)
-solana-keygen new -o ~/.config/solana/id.json
-
-# Confirm configuration
-solana config get
-```
-
-### 2. Get Testnet SOL
-
-```bash
-# Get SOL from testnet faucet
+# Get testnet SOL
 solana airdrop 2
-```
-
-### 3. Update Project Configuration
-
-Edit `Anchor.toml` file to configure devnet deployment:
-
-```toml
-[provider]
-cluster = "devnet"
-wallet = "~/.config/solana/id.json"
-
-[programs.devnet]
-cfx_stake_core = "<Replace with staking core program ID>"
-cfx_rewards = "<Replace with rewards program ID>"
-cfx_liquidity = "<Replace with liquidity program ID>"
-```
-
-### 4. Deploy CFX Token on Testnet (SPL Token)
-
-Before deploying and testing the staking system on testnet, you need to create a simulated CFX token:
-
-```bash
-# Ensure configured for testnet
-solana config set --url https://api.devnet.solana.com
-
-# Create token mint account (6 decimals)
-spl-token create-token --decimals 6
-# Output will show: Creating token <TOKEN_ADDRESS>
-# Note down this TOKEN_ADDRESS, this is your CFX token address
-
-# Create a token account for your wallet
-spl-token create-account <TOKEN_ADDRESS>
-
-# Mint some tokens for testing (e.g., 1 billion tokens)
-spl-token mint <TOKEN_ADDRESS> 1000000000
-
-# Check your token balance
-spl-token balance <TOKEN_ADDRESS>
-```
-
-When deploying the staking system, you need to use this newly created token address as the CFX token address, updating relevant configuration files and deployment scripts.
-
-### 5. Calculate Program Rent
-
-Before deployment, you can calculate the rent (storage fees) required for programs:
-
-```bash
-# Calculate rent for local network
-node migrations/calculate-rent.js --cluster=localnet
-
-# Calculate rent for devnet
-node migrations/calculate-rent.js --cluster=devnet
-
-# Calculate rent for mainnet
-node migrations/calculate-rent.js --cluster=mainnet
-```
-
-### 6. Deploy to Testnet
-
-```bash
-# Build project
-anchor build
-
-# Get program IDs
-solana address -k target/deploy/cfx_stake_core-keypair.json
-solana address -k target/deploy/cfx_rewards-keypair.json
-solana address -k target/deploy/cfx_liquidity-keypair.json
-
-# Update program IDs in Anchor.toml and lib.rs files of each program
 
 # Deploy to testnet
-anchor deploy
-```
-
-### 7. Run Deployment Scripts
-
-Deployment scripts will automatically deploy all split programs (cfx-stake-core, cfx-rewards, cfx-liquidity):
-
-```bash
-# Configure and run deployment scripts
-anchor migrate --provider.cluster devnet
-```
-
-## Mainnet Deployment
-
-**Note:** Before deploying to mainnet, ensure thorough testing of your programs and consider conducting security audits.
-
-### 1. Prepare Mainnet Deployment Wallet
-
-```bash
-# Create dedicated mainnet deployment wallet (recommended)
-solana-keygen new -o ~/.config/solana/mainnet-deployer.json
-
-# Switch to mainnet
-solana config set --url https://api.mainnet-beta.solana.com
-solana config set -k ~/.config/solana/mainnet-deployer.json
-```
-
-Ensure the mainnet wallet has sufficient SOL to pay for deployment and transaction fees. Generally, deploying a medium-sized program typically requires about 0.5-2 SOL for storage rent and transaction fees.
-
-### 2. Update Project Configuration
-
-Edit `Anchor.toml` file to configure mainnet deployment:
-
-```toml
-[provider]
-cluster = "mainnet"
-wallet = "~/.config/solana/mainnet-deployer.json"
-
-[programs.mainnet]
-solana_stake = "<Replace with your program ID>"
-```
-
-### 3. Deploy CFX Token on Mainnet (SPL Token)
-
-Before deploying the staking system on mainnet, you need to create or use an existing CFX token:
-
-```bash
-# Ensure configured for mainnet
-solana config set --url https://api.mainnet-beta.solana.com
-
-# Create token mint account (6 decimals)
-spl-token create-token --decimals 6
-# Output will show: Creating token <TOKEN_ADDRESS>
-# Note down this TOKEN_ADDRESS, this is your CFX token address
-
-# Create a token account for your wallet
-spl-token create-account <TOKEN_ADDRESS>
-
-# Mint tokens
-spl-token mint <TOKEN_ADDRESS> <token_amount>
-```
-
-If you already have an existing CFX token, use its address to update relevant configurations.
-
-### 4. Calculate Mainnet Program Rent
-
-Before deploying to mainnet, calculating the rent required for programs is important to ensure you have sufficient SOL:
-
-```bash
-# Calculate mainnet rent
-node migrations/calculate-rent.js --cluster=mainnet
-```
-
-### 5. Deploy to Mainnet
-
-```bash
-# Build project
-anchor build
-
-# Confirm program IDs
-solana address -k target/deploy/cfx_stake_core-keypair.json
-solana address -k target/deploy/cfx_rewards-keypair.json
-solana address -k target/deploy/cfx_liquidity-keypair.json
-
-# Deploy to mainnet
-anchor deploy
-```
-
-### 6. Run Mainnet Deployment Scripts
-
-Deployment scripts will automatically deploy all split programs (cfx-stake-core, cfx-rewards, cfx-liquidity):
-
-```bash
-# Run deployment scripts
-anchor migrate --provider.cluster mainnet
-```
-
-### 7. Verify Deployment
-
-```bash
-# Check program accounts
-solana account <program_ID>
+anchor deploy --provider.cluster devnet
 ```
 
 ## Client Integration
 
-After deployment, frontend applications can use the following information to connect to your programs:
+After deployment, frontend applications can connect to your program using the following information:
 
 ```javascript
 const programId = "<your_program_ID>";
 const connection = new Connection("<network_URL>");
-// Continue using Anchor client library to interact with your programs
+// Continue using Anchor client library to interact with your program
 ```
 
-## Contract Development Process
+## Testnet/Mainnet Funding
 
-Chain-Fox DAO project follows this development process:
+- **Testnet**: Use `solana airdrop` command to get test SOL
+- **Mainnet**: Transfer real SOL from exchanges or other wallets
 
-1. **Design Phase**:
-   - Write detailed technical design documents
-   - Define contract interfaces and data structures
-   - Design security mechanisms and permission controls
+### Contract-specific Notes
 
-2. **Implementation Phase**:
-   - Implement contract code according to design documents
-   - Conduct code reviews and optimization
+- Contract uses **6 decimals** for CFX tokens (not 9)
+- Minimum stake amount is **10,000 CFX** (10,000,000,000 in raw units)
+- Maximum individual stake is **10,000,000 CFX** per user
+- Maximum total pool capacity: **400,000,000 CFX**
+- Lock period is configurable during initialization (default: 30 days, maximum: 1 year)
+- Emergency mode allows immediate withdrawal (bypassing lock period)
+- Each user has their own UserStake account recording staking information
+- All actual CFX tokens are stored in the contract's unified token vault
+- Administrators can only withdraw CFX from contract's token vault through AdminWithdraw multi-sig proposals
+- Contract tracks total_staked to protect user funds, administrator withdrawals can only access excess funds in vault
 
-3. **Deployment Phase**:
-   - Prepare deployment scripts and configurations
-   - Calculate program rent
-   - Deploy to mainnet
+### Staking Limits (Boundary Protection)
 
-4. **Maintenance Phase**:
-   - Monitor contract operation status
-   - Handle user feedback and issues
+| Limit Type | Amount |
+|------------|--------|
+| Minimum Stake | 10,000 CFX |
+| Maximum Individual Stake | 10,000,000 CFX |
+| Maximum Total Pool Size | 400,000,000 CFX |
+| Default Lock Period | 30 days |
+| Maximum Lock Period | 1 year |
 
-### Code Review Checklist
+## License
 
-Before each code submission, ensure:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- [ ] Code follows project coding standards
-- [ ] All edge cases and error conditions are handled
-- [ ] Permission checks are correctly implemented
-- [ ] Mathematical calculations consider overflow and precision issues
-- [ ] Documentation and comments are updated
+---
 
-## Multi-signature Wallet Setup
-
-Chain-Fox DAO uses multi-signature wallets to manage team funds and liquidity, ensuring fund security. Detailed setup and operation procedures for multi-signature wallets will be provided in separate documentation.
-
-## FAQ
-
-### Compilation Errors
-
-If you encounter errors related to Cargo.lock versions, you can try:
-
-```bash
-# Remove lock file and rebuild with stable version
-rm Cargo.lock
-rustup default stable
-anchor build
-```
-
-### Deployment Failures
-
-If deployment to testnet or mainnet fails, check:
-
-1. Whether wallet has sufficient SOL
-2. Whether program IDs are correctly configured
-3. Whether RPC node connection is stable
-
-You can try using custom RPC endpoints:
-
-```bash
-solana config set --url https://your-custom-rpc.com
-```
-
-### Testnet/Mainnet Funding
-
-- Testnet: Use `solana airdrop` command to get test SOL
-- Mainnet: Transfer real SOL from exchanges or other wallets
+**Disclaimer**: This software is provided "as is" without any express or implied warranties. Users assume all risks associated with using this software.

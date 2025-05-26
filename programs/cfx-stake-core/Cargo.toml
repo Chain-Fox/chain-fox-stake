@@ -1,0 +1,21 @@
+[package]
+name = "cfx-stake-core"
+version = "0.1.0"
+description = "Core staking functionality for Chain-Fox DAO"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "cfx_stake_core"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.26.0"
+anchor-spl = "0.26.0"
+solana-program = "1.18.26"
