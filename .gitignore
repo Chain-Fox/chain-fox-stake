@@ -1,11 +1,42 @@
 
+# Anchor
 .anchor
-.DS_Store
 target
 **/*.rs.bk
+
+# Node.js
 node_modules
-test-ledger
-docs
-scripts
 package-lock.json
+
+# Solana local validator data
+test-ledger
+fresh-ledger
+ledger/
+*.ledger
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build artifacts
 deployment-verification.json
+
+# Documentation (if auto-generated)
+docs
+
+# Scripts (if containing sensitive data)
+scripts
+
+
+fresh-ledger
