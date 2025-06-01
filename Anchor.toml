@@ -3,17 +3,19 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-cfx_stake_core = "GRqdtyXwmjxKHWsZTaUFPh7ZXL11Vw11yqDGduJJVfkd"
+cfx_stake_core = "C6S9i5vFWTcVymiBrmUrCpZGdSyChWPrAbfFd9fdRs2r"
+cfx_token = "H7m4Y4ZXnXPEoKsBGyestPDdwvPrzqYTBVY8sXbjCgHr"
 
 [programs.devnet]
-cfx_stake_core = "BqtM51hgLrgNidapuLLQdcmX4PkhyBQMj715Ddyqbyao"
+cfx_stake_core = "HupexUsRkmBGiFxSM14JwUJs7ADJNFfQ6UygRuKrHyp8"
+cfx_token = "AfMqiffUwwkSNLS7tpMhyCRm28qqqMGCfYKCBkZo6uHM"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
-wallet = "/Users/eason/.config/solana/id.json"
+cluster = "devnet"
+wallet = "/Users/eason/.config/solana/devnet.json"
 
 [test]
 startup_wait = 10000

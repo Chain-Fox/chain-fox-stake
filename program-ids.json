@@ -1,16 +1,16 @@
 {
-  "timestamp": "2025-05-26T10:59:34.346Z",
-  "network": "localnet",
+  "timestamp": "2025-05-31T03:02:33.740Z",
+  "network": "devnet",
   "deployer": "4o3E6G5wTwcqLR2J278h27pGQmU6YesSNKSjUdQbhFK9",
   "programs": {
-    "CFX_STAKE_CORE": "7Fbkoma4qtT6qF4r8ifWYnCa1oz3RGpnosjBmH6HvdTj"
+    "CFX_STAKE_CORE": "HupexUsRkmBGiFxSM14JwUJs7ADJNFfQ6UygRuKrHyp8"
   },
   "tokens": {
-    "CFX_TOKEN_MINT": "BWHgo7c7cUhWgcuDLL3CKxz2QcG1hEPDjpPQ4xwfHEp1"
+    "CFX_TOKEN_MINT": "AfMqiffUwwkSNLS7tpMhyCRm28qqqMGCfYKCBkZo6uHM"
   },
   "deployed_accounts": {
     "stake_pool": {
-      "address": "HWY7FDS2T8wPvWPJEu1QjyePFmFfKYqFsn9EZc7ij7Jk",
+      "address": "43yd7mve4YH3U1dDyfuCks27EcC7EdT9vvXDJ837i1FD",
       "type": "PDA",
       "program": "CFX_STAKE_CORE",
       "description": "质押池账户",
@@ -33,18 +33,38 @@
       "role": "team_treasury"
     },
     "token_vault": {
-      "address": "BjdR73YBZS7T683cHnCTtvZN2eZ5pQ8p58B12fKFMsKN",
+      "address": "GHjch8hUBategenAJwB41Mned3mkpr69r82kx87CD7hv",
       "type": "TokenAccount",
       "program": "TOKEN_PROGRAM",
       "description": "质押池代币金库",
-      "mint": "BWHgo7c7cUhWgcuDLL3CKxz2QcG1hEPDjpPQ4xwfHEp1",
-      "authority": "HWY7FDS2T8wPvWPJEu1QjyePFmFfKYqFsn9EZc7ij7Jk"
+      "mint": "AfMqiffUwwkSNLS7tpMhyCRm28qqqMGCfYKCBkZo6uHM",
+      "authority": "43yd7mve4YH3U1dDyfuCks27EcC7EdT9vvXDJ837i1FD"
+    },
+    "multisig_config": {
+      "address": "DdTsEKJwry1WziKFTgVK3fSYMSY9vqcE2iZTZkE3eCLt",
+      "type": "PDA",
+      "program": "CFX_STAKE_CORE",
+      "description": "多签配置账户",
+      "seeds": [
+        "multisig_config",
+        "stake_pool"
+      ],
+      "bump": 255,
+      "signers": [
+        "DJmqhERPWgaRfN3FPCJRtz3hARN8EXHUtn9ppjK2Hn6o",
+        "Fs11duup39VxvzsscgCiRQJa82k39sNw3Hu51KztBbUs",
+        "2tVSZLuDW1giCYYCXSeXLcA5B5c9J8NXfUVDzDPxt3D1"
+      ],
+      "threshold": 2,
+      "proposal_count": 0,
+      "created_at": "2025-05-31T03:30:00.000Z",
+      "transaction_signature": "FwVW1gGNxMwNCgq8rq4J4DMsJEdARFs8cRLRynpaaqEghMGaF4k2m53Jmz3PunBzxNMP7GFeHV4jcz8ZHnJzarj"
     }
   },
   "deployed_programs": [
     {
       "name": "cfx-stake-core",
-      "id": "7Fbkoma4qtT6qF4r8ifWYnCa1oz3RGpnosjBmH6HvdTj",
+      "id": "HupexUsRkmBGiFxSM14JwUJs7ADJNFfQ6UygRuKrHyp8",
       "dirName": "cfx-stake-core"
     }
   ],
@@ -59,10 +79,10 @@
       "symbol": "CFX",
       "decimals": 6,
       "total_supply": "1000000000000000",
-      "network": "localnet",
-      "created_at": "2025-05-25T12:41:21.605Z"
+      "network": "devnet",
+      "created_at": "2025-05-31T03:00:43.873Z"
     },
-    "last_regeneration": "2025-05-26T10:55:53.226Z",
+    "last_regeneration": "2025-05-31T02:51:49.108Z",
     "regeneration_reason": "Program code changes"
   }
 }

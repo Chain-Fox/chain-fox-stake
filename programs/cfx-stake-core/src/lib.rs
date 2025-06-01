@@ -2,16 +2,21 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 use solana_program::pubkey::Pubkey;
 
-declare_id!("7Fbkoma4qtT6qF4r8ifWYnCa1oz3RGpnosjBmH6HvdTj");
+declare_id!("HupexUsRkmBGiFxSM14JwUJs7ADJNFfQ6UygRuKrHyp8");
 
 // Constants definition
 const MIN_STAKE_AMOUNT: u64 = 10_000 * 1_000_000; // 10,000 CFX (6 decimals)
 
-// Maximum individual stake amount (10,000,000 CFX with 6 decimals)
-const MAX_INDIVIDUAL_STAKE: u64 = 10_000_000 * 1_000_000; // 10,000,000 CFX
+// Maximum individual stake amount (100,000,000 CFX with 6 decimals)
+const MAX_INDIVIDUAL_STAKE: u64 = 100_000_000 * 1_000_000; // 100,000,000 CFX
 
-// Maximum pool size (400,000,000 CFX with 6 decimals)
-const MAX_POOL_SIZE: u64 = 400_000_000 * 1_000_000; // 400,000,000 CFX
+
+const MIN_UNSTAKE_AMOUNT: u64 = 10_000 * 1_000_000; // 10,000 CFX (6 decimals)
+// Maximum individual unstake amount (100,000,000 CFX with 6 decimals)
+const MAX_INDIVIDUAL_UNSTAKE: u64 = 100_000_000 * 1_000_000; // 100,000,000 CFX
+
+// Maximum pool size (900,000,000 CFX with 6 decimals)
+const MAX_POOL_SIZE: u64 = 900_000_000 * 1_000_000; // 900,000,000 CFX
 
 // Multisig proposal types
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq)]
@@ -289,6 +294,10 @@ pub mod cfx_stake_core {
         // Ensure user has not already requested withdrawal
         require!(!user_stake.withdrawal_requested, StakeError::WithdrawalAlreadyRequested);
 
+        // Validate unstake amount limits
+        require!(user_stake.staked_amount >= MIN_UNSTAKE_AMOUNT, StakeError::BelowMinimumUnstakeAmount);
+        require!(user_stake.staked_amount <= MAX_INDIVIDUAL_UNSTAKE, StakeError::ExceedsMaximumUnstakeAmount);
+
         // Set unlock slot based on emergency mode
         let current_slot = Clock::get()?.slot;
         if stake_pool.emergency_mode {
@@ -345,6 +354,10 @@ pub mod cfx_stake_core {
 
         // Ensure user has requested withdrawal
         require!(user_stake.withdrawal_requested, StakeError::WithdrawalNotRequested);
+
+        // Validate unstake amount limits
+        require!(user_stake.staked_amount >= MIN_UNSTAKE_AMOUNT, StakeError::BelowMinimumUnstakeAmount);
+        require!(user_stake.staked_amount <= MAX_INDIVIDUAL_UNSTAKE, StakeError::ExceedsMaximumUnstakeAmount);
 
         // Ensure lock period has passed
         let current_slot = Clock::get()?.slot;
@@ -642,6 +655,12 @@ pub enum StakeError {
 
     #[msg("Excessive lock duration")]
     ExcessiveLockDuration,
+
+    #[msg("Below minimum unstake amount")]
+    BelowMinimumUnstakeAmount,
+
+    #[msg("Exceeds maximum unstake amount")]
+    ExceedsMaximumUnstakeAmount,
 }
 
 // Account validation structures
