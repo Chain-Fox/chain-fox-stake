@@ -90,7 +90,7 @@ The CFX Staking Core contract implements multiple security features:
 - **User Fund Protection**: Only users themselves can deposit and withdraw, administrators cannot access user funds even in emergencies
 - **Multi-signature Management**: 3-wallet multi-signature mechanism for all critical administrator operations
 - **Reentrancy Attack Protection**: Guards against reentrancy attacks in critical functions
-- **Staking Limits**: Maximum individual stake (10 million CFX) and maximum total pool size (400 million CFX)
+- **Staking Limits**: Maximum individual stake (10 million CFX) and maximum total pool size (900 million CFX)
 - **Time Range Checks**: Lock periods cannot exceed 1 year
 - **Arithmetic Safety**: All calculations include overflow protection
 - **Administrator Withdrawal Control**: Administrators can only withdraw CFX from contract's token vault through AdminWithdraw multi-sig proposals
