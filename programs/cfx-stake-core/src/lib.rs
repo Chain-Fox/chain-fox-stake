@@ -47,6 +47,9 @@ const DEFAULT_LOCK_DURATION_SLOTS: u64 = 30 * SLOTS_PER_DAY; // 30 days in slots
 // Maximum lock duration (1 year in slots for safety)
 const MAX_LOCK_DURATION_SLOTS: u64 = 365 * SLOTS_PER_DAY; // 1 year in slots
 
+// Maximum byte number of proposal data
+const MAX_PROPOSAL_DATA_LEN: usize = 256;
+
 // Reentrancy guard macro
 macro_rules! reentrancy_guard {
     ($stake_pool:expr) => {
@@ -68,15 +71,21 @@ pub mod cfx_stake_core {
     // Initialize stake pool
     pub fn initialize(
         ctx: Context<Initialize>,
-        stake_pool_bump: u8,
+        _stake_pool_bump: u8,
         lock_duration_slots: Option<u64>,
     ) -> Result<()> {
         let stake_pool = &mut ctx.accounts.stake_pool;
         stake_pool.authority = ctx.accounts.authority.key();
         stake_pool.token_mint = ctx.accounts.token_mint.key();
         stake_pool.token_vault = ctx.accounts.token_vault.key();
-        stake_pool.bump = stake_pool_bump;
-        stake_pool.lock_duration_slots = lock_duration_slots.unwrap_or(DEFAULT_LOCK_DURATION_SLOTS);
+        stake_pool.bump = *ctx.bumps.get("stake_pool").unwrap();
+        let duration = lock_duration_slots.unwrap_or(DEFAULT_LOCK_DURATION_SLOTS);
+        // Safety check: ensure lock duration is reasonable (not more than 1 year)
+        require!(
+            duration <= MAX_LOCK_DURATION_SLOTS,
+            StakeError::ExcessiveLockDuration
+        );
+        stake_pool.lock_duration_slots = duration;
         stake_pool.total_staked = 0;
         stake_pool.emergency_mode = false;
         stake_pool.reentrancy_guard = false;
@@ -92,6 +101,10 @@ pub mod cfx_stake_core {
         _multisig_bump: u8,
     ) -> Result<()> {
         require!(threshold > 0 && threshold <= 3, StakeError::InvalidThreshold);
+        // Rule out duplicate signers
+        require_neq!(signers[0], signers[1], StakeError::DuplicateSigner);
+        require_neq!(signers[0], signers[2], StakeError::DuplicateSigner);
+        require_neq!(signers[1], signers[2], StakeError::DuplicateSigner);
 
         let multisig_config = &mut ctx.accounts.multisig_config;
         multisig_config.signers = signers;
@@ -110,6 +123,7 @@ pub mod cfx_stake_core {
         data: Vec<u8>,
         _proposal_bump: u8,
     ) -> Result<()> {
+        require!(data.len() <= MAX_PROPOSAL_DATA_LEN, StakeError::ProposalDataTooLarge);
         let multisig_config = &mut ctx.accounts.multisig_config;
         let proposal = &mut ctx.accounts.proposal;
 
@@ -208,7 +222,7 @@ pub mod cfx_stake_core {
     }
 
     // Create user stake account
-    pub fn create_user_stake(ctx: Context<CreateUserStake>, user_stake_bump: u8) -> Result<()> {
+    pub fn create_user_stake(ctx: Context<CreateUserStake>, _user_stake_bump: u8) -> Result<()> {
         let user_stake = &mut ctx.accounts.user_stake;
         user_stake.owner = ctx.accounts.owner.key();
         user_stake.stake_pool = ctx.accounts.stake_pool.key();
@@ -216,7 +230,7 @@ pub mod cfx_stake_core {
         user_stake.last_stake_slot = 0;
         user_stake.unlock_slot = 0;
         user_stake.withdrawal_requested = false;
-        user_stake.bump = user_stake_bump;
+        user_stake.bump = *ctx.bumps.get("user_stake").unwrap();
 
         Ok(())
     }
@@ -372,8 +386,8 @@ pub mod cfx_stake_core {
             StakeError::InsufficientFunds
         );
 
-        // Update stake pool state
-        stake_pool.total_staked = stake_pool.total_staked.checked_sub(staked_amount).ok_or(StakeError::ArithmeticOverflow)?;
+        // Compute new stake pool state
+        let new_total = stake_pool.total_staked.checked_sub(staked_amount).ok_or(StakeError::ArithmeticOverflow)?;
 
         // Transfer full amount from stake pool vault to user account
         let seeds = &[
@@ -392,6 +406,9 @@ pub mod cfx_stake_core {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
         token::transfer(cpi_ctx, staked_amount)?;
+
+        // Update new stake pool state
+        stake_pool.total_staked = new_total;
 
         // Emit event before resetting
         emit!(WithdrawEvent {
@@ -661,6 +678,12 @@ pub enum StakeError {
 
     #[msg("Exceeds maximum unstake amount")]
     ExceedsMaximumUnstakeAmount,
+
+    #[msg("Duplicate signers for multisig")]
+    DuplicateSigner,
+
+    #[msg("Proposal data too large")]
+    ProposalDataTooLarge,
 }
 
 // Account validation structures
