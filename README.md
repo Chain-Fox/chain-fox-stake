@@ -336,7 +336,7 @@ const connection = new Connection("<network_URL>");
 |------------|--------|
 | Minimum Stake | 10,000 CFX |
 | Maximum Individual Stake | 10,000,000 CFX |
-| Maximum Total Pool Size | 400,000,000 CFX |
+| Maximum Total Pool Size | 900,000,000 CFX |
 | Default Lock Period | 30 days |
 | Maximum Lock Period | 1 year |
 
